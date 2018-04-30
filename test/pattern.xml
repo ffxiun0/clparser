@@ -1,0 +1,116 @@
+<TestPattern>
+  <PatternList>
+    <Pattern>
+      <Input></Input>
+      <Output>""</Output>
+    </Pattern>
+    <Pattern>
+      <Input> </Input>
+      <Output>" "</Output>
+    </Pattern>
+    <Pattern>
+      <Input>a</Input>
+      <Output>a</Output>
+    </Pattern>
+    <Pattern>
+      <Input>a b</Input>
+      <Output>"a b"</Output>
+    </Pattern>
+    <Pattern>
+      <Input>a b</Input>
+      <Output>"a b"</Output>
+    </Pattern>
+    <Pattern>
+      <Input>a b </Input>
+      <Output>"a b "</Output>
+    </Pattern>
+    <Pattern>
+      <Input> a b</Input>
+      <Output>" a b"</Output>
+    </Pattern>
+    <Pattern>
+      <Input> a b</Input>
+      <Output>" a b"</Output>
+    </Pattern>
+    <Pattern>
+      <Input>a\b</Input>
+      <Output>a\b</Output>
+    </Pattern>
+    <Pattern>
+      <Input>a"b</Input>
+      <Output>"a\"b"</Output>
+    </Pattern>
+    <Pattern>
+      <Input>\a\b\</Input>
+      <Output>\a\b\</Output>
+    </Pattern>
+    <Pattern>
+      <Input>"a"b"</Input>
+      <Output>"\"a\"b\""</Output>
+    </Pattern>
+    <Pattern>
+      <Input>\</Input>
+      <Output>\</Output>
+    </Pattern>
+    <Pattern>
+      <Input>\\</Input>
+      <Output>\\</Output>
+    </Pattern>
+    <Pattern>
+      <Input>\\ \\</Input>
+      <Output>"\\ \\\\"</Output>
+    </Pattern>
+    <Pattern>
+      <Input>"</Input>
+      <Output>"\""</Output>
+    </Pattern>
+    <Pattern>
+      <Input>""</Input>
+      <Output>"\"\""</Output>
+    </Pattern>
+    <Pattern>
+      <Input>"" ""</Input>
+      <Output>"\"\" \"\""</Output>
+    </Pattern>
+    <Pattern>
+      <Input>\"</Input>
+      <Output>"\\\""</Output>
+    </Pattern>
+    <Pattern>
+      <Input>\\"</Input>
+      <Output>"\\\\\""</Output>
+    </Pattern>
+    <Pattern>
+      <Input>"\\"</Input>
+      <Output>"\"\\\\\""</Output>
+    </Pattern>
+    <Pattern>
+      <Input>"\\</Input>
+      <Output>"\"\\\\"</Output>
+    </Pattern>
+    <Pattern>
+      <Input>"\</Input>
+      <Output>"\"\\"</Output>
+    </Pattern>
+    <Pattern>
+      <Input>\"\</Input>
+      <Output>"\\\"\\"</Output>
+    </Pattern>
+    <Pattern>
+      <Input>C:\Users\Guest</Input>
+      <Output>C:\Users\Guest</Output>
+    </Pattern>
+    <Pattern>
+      <Input>C:\Users\Guest\</Input>
+      <Output>C:\Users\Guest\</Output>
+    </Pattern>
+    <Pattern>
+      <Input>C:\Program Files</Input>
+      <Output>"C:\Program Files"</Output>
+    </Pattern>
+    <Pattern>
+      <Input>C:\Program Files\</Input>
+      <Output>"C:\Program Files\\"</Output>
+    </Pattern>
+  </PatternList>
+</TestPattern>

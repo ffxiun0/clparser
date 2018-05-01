@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 
 namespace CommandLineParser {
     class CommandLineEncoder {
+        private CommandLineEncoder() { }
+
         public static string Encode(string s) {
             if (s.Length == 0) return "\"\"";
 

@@ -231,6 +231,46 @@ namespace CommandLineTest {
         }
 
         [TestMethod]
+        public void TestEncodeArgumentInjection() {
+            // [test.exe] [--name] [John Smith" --delete "*] ->
+            // [test.exe --name "John Smith\" --delete \"*"]
+            var exe = "test.exe";
+            var args = new string[] {
+                "--name",
+                "John Smith\" --delete \"*",
+            };
+            var cmd = CommandLine.ToString(exe, args);
+            Assert.AreEqual(cmd, "test.exe --name \"John Smith\\\" --delete \\\"*\"");
+
+            var cl = CommandLine.Parse(cmd);
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, exe);
+            Assert.AreEqual(cl.Args.Length, 2);
+            Assert.AreEqual(cl.Args[0], args[0]);
+            Assert.AreEqual(cl.Args[1], args[1]);
+        }
+
+        [TestMethod]
+        public void TestEncodeArgumentInjection2() {
+            // [test.exe] [--name] [John Smith\" --delete *] ->
+            // [test.exe --name "John Smith\\\" --delete *"]
+            var exe = "test.exe";
+            var args = new string[] {
+                "--name",
+                "John Smith\\\" --delete *",
+            };
+            var cmd = CommandLine.ToString(exe, args);
+            Assert.AreEqual(cmd, "test.exe --name \"John Smith\\\\\\\" --delete *\"");
+
+            var cl = CommandLine.Parse(cmd);
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, exe);
+            Assert.AreEqual(cl.Args.Length, 2);
+            Assert.AreEqual(cl.Args[0], args[0]);
+            Assert.AreEqual(cl.Args[1], args[1]);
+        }
+
+        [TestMethod]
         public void TestEncodeFromPatternFile() {
             var tp = TestPattern.Load(@"..\..\pattern.xml");
             Assert.IsTrue(tp.PatternList.Length > 0);

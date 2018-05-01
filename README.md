@@ -1,11 +1,14 @@
-# Command line parser for Windows
+# Command line text parser/encoder for Windows process
 
-## Parsing
+- Parse the command line text. (Windows process specs)
+- Encode symbolic characters. (" and \\)
 
-|Input|"C:\Program Files\test.exe" -m="Test message"|
-|:-|:-|
-|args[0]|C:\Program Files\test.exe|
-|args[1]|-m=Test message|
+## Parse
+
+|Input|string|"C:\Program Files\test.exe" -m="Test message"|
+|:-|:-|:-|
+|Output|args[0]|C:\Program Files\test.exe|
+|Output|args[1]|-m=Test message|
 
 ```csharp
 var cmd = "\"C:\\Program Files\\test.exe\" -m=\"Test message\"";
@@ -17,13 +20,13 @@ if (cl != null) {
 }
 ```
 
-## Encoding
+## Encode
 
-|Output|test.exe -dir "D:\Test Dir\\\\"|
-|:-|:-|
-|args[0]|test.exe|
-|args[1]|-dir|
-|args[2]|D:\Test Dir\\ |
+|Output|string|test.exe -dir "D:\Test Dir\\\\"|
+|:-|:-|:-|
+|Input|args[0]|test.exe|
+|Input|args[1]|-dir|
+|Input|args[2]|D:\Test Dir\\ |
 
 ```csharp
 var args = new string[] {

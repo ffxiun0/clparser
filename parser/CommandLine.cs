@@ -23,8 +23,13 @@ namespace CommandLineParser {
         private CommandLine(IEnumerable<string> args) {
             var list = args.ToList();
 
-            Exe = list[0];
-            Args = list.GetRange(1, list.Count - 1).ToArray();
+            if (list.Count > 0) {
+                Exe = list[0];
+                Args = list.GetRange(1, list.Count - 1).ToArray();
+            } else {
+                Exe = "";
+                Args = new string[0];
+            }
         }
 
         public static CommandLine Parse(string s) {
@@ -32,7 +37,6 @@ namespace CommandLineParser {
 
             var args = parser.Parse(s);
             if (args == null) return null;
-            if (args.Count() == 0) return new CommandLine();
 
             return new CommandLine(args);
         }

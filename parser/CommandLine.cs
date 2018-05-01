@@ -66,8 +66,7 @@ namespace CommandLineParser {
         }
 
         public static string ToString(string exe, IEnumerable<string> args) {
-            var commandLine = Concat(exe, args);
-            return ToString(commandLine);
+            return CommandLineEncoder.Encode(Concat(exe, args));
         }
 
         private static IEnumerable<T> Concat<T>(T element, IEnumerable<T> list) {

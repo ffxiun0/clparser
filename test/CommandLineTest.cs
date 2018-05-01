@@ -53,7 +53,8 @@ namespace CommandLineTest {
 
         [TestMethod]
         public void TestParseEqualQuote3Arg1() {
-            // [test.exe --options="opt 1","opt 2","opt 3"] -> [test.exe] [--options=opt 1,opt 2,opt 3]
+            // [test.exe --options="opt 1","opt 2","opt 3"] ->
+            // [test.exe] [--options=opt 1,opt 2,opt 3]
             var cl = CommandLine.Parse("test.exe --options=\"opt 1\",\"opt 2\",\"opt 3\"");
             Assert.IsNotNull(cl);
             Assert.AreEqual(cl.Exe, "test.exe");
@@ -85,8 +86,42 @@ namespace CommandLineTest {
         }
 
         [TestMethod]
+        public void TestParseJapaneseArg2() {
+            // [テスト.exe -m "テスト メッセージ"] ->
+            // [テスト.exe] [-m] [テスト メッセージ]
+            var cl = CommandLine.Parse("テスト.exe -m \"テスト メッセージ\"");
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, "テスト.exe");
+            Assert.AreEqual(cl.Args.Length, 2);
+            Assert.AreEqual(cl.Args[0], "-m");
+            Assert.AreEqual(cl.Args[1], "テスト メッセージ");
+        }
+
+        [TestMethod]
+        public void TestParseSurrogatePairsArg2() {
+            // [𩸽.exe -m "𩸽 メッセージ"] -> [𩸽.exe] [-m] [𩸽 メッセージ]
+            var cl = CommandLine.Parse("𩸽.exe -m \"𩸽 メッセージ\"");
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, "\uD867\uDE3D.exe");
+            Assert.AreEqual(cl.Args.Length, 2);
+            Assert.AreEqual(cl.Args[0], "-m");
+            Assert.AreEqual(cl.Args[1], "\uD867\uDE3D メッセージ");
+        }
+
+        [TestMethod]
+        public void TestParseColorEmojiArg2() {
+            // [⚡️test.exe -m "⚡️ Message"] -> [⚡️test.exe] [-m] [⚡️ Message]
+            var cl = CommandLine.Parse("⚡️test.exe -m \"⚡️ Message\"");
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, "\u26A1\uFE0Ftest.exe");
+            Assert.AreEqual(cl.Args.Length, 2);
+            Assert.AreEqual(cl.Args[0], "-m");
+            Assert.AreEqual(cl.Args[1], "\u26A1\uFE0F Message");
+        }
+
+        [TestMethod]
         public void TestParseArg2WithWhitespaces() {
-            // [test.exe -m "Message"] -> [test.exe] [-m] [Test message]
+            // [ test.exe  -m   "Test message"    ] -> [test.exe] [-m] [Test message]
             var cl = CommandLine.Parse(" test.exe  -m   \"Test message\"    ");
             Assert.IsNotNull(cl);
             Assert.AreEqual(cl.Exe, "test.exe");
@@ -108,6 +143,20 @@ namespace CommandLineTest {
         public void TestParseMissingQuote() {
             // ["]
             var cl = CommandLine.Parse("\"");
+            Assert.IsNull(cl);
+        }
+
+        [TestMethod]
+        public void TestParseMissingQuoteBackslashed() {
+            // ["\"]
+            var cl = CommandLine.Parse("\"\\\"");
+            Assert.IsNull(cl);
+        }
+
+        [TestMethod]
+        public void TestParseMissingQuoteBackslashed2() {
+            // ["\\\"]
+            var cl = CommandLine.Parse("\"\\\\\\\"");
             Assert.IsNull(cl);
         }
 

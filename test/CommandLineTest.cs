@@ -225,7 +225,16 @@ namespace CLParserTest {
 
         [TestMethod]
         public void TestParseDoubleQuoteEncoding2() {
-            // [""""] -> ["]
+            // [""""""] -> [""]
+            var cl = CommandLine.Parse("\"\"\"\"\"\"");
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, "\"\"");
+            Assert.AreEqual(cl.Args.Length, 0);
+        }
+
+        [TestMethod]
+        public void TestParseDoubleQuoteEncoding3() {
+            // [""" """] -> [" "]
             var cl = CommandLine.Parse("\"\"\" \"\"\"");
             Assert.IsNotNull(cl);
             Assert.AreEqual(cl.Exe, "\" \"");

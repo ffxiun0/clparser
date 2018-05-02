@@ -348,7 +348,7 @@ namespace CLParserTest {
         [TestMethod]
         public void TestEncodeArgumentInjection2() {
             // [test.exe] [--name] [John Smith\" --delete * -m \"] ->
-            // [test.exe --name "John Smith\\\" --delete * -m \\\"]
+            // [test.exe --name "John Smith\\\" --delete * -m \\\""]
             // ex. unsecure (" -> \")
             //   [test.exe --name "John Smith\\" --delete * -m \\""] ->
             //   [test.exe] [--name] [John Smith\] [--delete] [*] [-m] [\]

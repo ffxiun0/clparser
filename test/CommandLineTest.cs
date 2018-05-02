@@ -12,13 +12,55 @@ namespace CommandLineTest {
     [TestClass]
     public class CommandLineTest {
         [TestMethod]
-        public void TestParseNullArg() {
+        public void TestParseEmpty() {
+            // [] ->
+            var cl = CommandLine.Parse("");
+            Assert.IsNotNull(cl);
+            Assert.IsTrue(cl.IsEmpty);
+            Assert.IsNull(cl.Exe);
+            Assert.AreEqual(cl.Args.Length, 0);
+            Assert.AreEqual(cl.All.Length, 0);
+            Assert.AreEqual(cl.ToString(), "");
+        }
+
+        [TestMethod]
+        public void TestParseEmptySpaces() {
+            // [   ] ->
+            var cl = CommandLine.Parse("   ");
+            Assert.IsNotNull(cl);
+            Assert.IsTrue(cl.IsEmpty);
+            Assert.IsNull(cl.Exe);
+            Assert.AreEqual(cl.Args.Length, 0);
+            Assert.AreEqual(cl.All.Length, 0);
+            Assert.AreEqual(cl.ToString(), "");
+        }
+
+        [TestMethod]
+        public void TestParseNullArg0() {
+            // [""] -> []
+            var cl = CommandLine.Parse("\"\"");
+            Assert.IsNotNull(cl);
+            Assert.IsFalse(cl.IsEmpty);
+            Assert.AreEqual(cl.Exe, "");
+            Assert.AreEqual(cl.Args.Length, 0);
+            Assert.AreEqual(cl.All.Length, 1);
+            Assert.AreEqual(cl.All[0], "");
+            Assert.AreEqual(cl.ToString(), "\"\"");
+        }
+
+        [TestMethod]
+        public void TestParseNullArg1() {
             // [test.exe ""] -> [test.exe] []
             var cl = CommandLine.Parse("test.exe \"\"");
             Assert.IsNotNull(cl);
+            Assert.IsFalse(cl.IsEmpty);
             Assert.AreEqual(cl.Exe, "test.exe");
             Assert.AreEqual(cl.Args.Length, 1);
             Assert.AreEqual(cl.Args[0], "");
+            Assert.AreEqual(cl.All.Length, 2);
+            Assert.AreEqual(cl.All[0], "test.exe");
+            Assert.AreEqual(cl.All[1], "");
+            Assert.AreEqual(cl.ToString(), "test.exe \"\"");
         }
 
         [TestMethod]
@@ -26,9 +68,14 @@ namespace CommandLineTest {
             // [test.exe --version] -> [test.exe] [--version]
             var cl = CommandLine.Parse("test.exe --version");
             Assert.IsNotNull(cl);
+            Assert.IsFalse(cl.IsEmpty);
             Assert.AreEqual(cl.Exe, "test.exe");
             Assert.AreEqual(cl.Args.Length, 1);
             Assert.AreEqual(cl.Args[0], "--version");
+            Assert.AreEqual(cl.All.Length, 2);
+            Assert.AreEqual(cl.All[0], "test.exe");
+            Assert.AreEqual(cl.All[1], "--version");
+            Assert.AreEqual(cl.ToString(), "test.exe --version");
         }
 
         [TestMethod]
@@ -295,7 +342,8 @@ namespace CommandLineTest {
                 var cl = CommandLine.Parse(p.Output);
                 Assert.IsNotNull(cl);
 
-                var decoded = cl.Exe;
+                Assert.IsFalse(cl.IsEmpty);
+                var decoded = cl.All[0];
 
                 var m = string.Format("■Input[{0}] Output[{1}] Decoded[{2}]",
                     p.Output, p.Input, decoded);

@@ -7,42 +7,28 @@ using System.Linq;
 
 namespace CommandLineParser {
     public class CommandLine {
+        private string[] all;
         private string exe;
         private string[] args;
 
-        private CommandLine() {
-            exe = "";
-            args = new string[0];
-        }
-
-        private CommandLine(string exe, IEnumerable<string> args) {
-            this.exe = exe;
-            this.args = args.ToArray();
-        }
-
         private CommandLine(IEnumerable<string> args) {
             var list = args.ToList();
+
+            this.all = list.ToArray();
 
             if (list.Count > 0) {
                 this.exe = list[0];
                 this.args = list.GetRange(1, list.Count - 1).ToArray();
             } else {
-                this.exe = "";
+                this.exe = null;
                 this.args = new string[0];
             }
         }
 
-        public string Exe {
-            get {
-                return exe;
-            }
-        }
-
-        public string[] Args {
-            get {
-                return args;
-            }
-        }
+        public string[] All { get => all; }
+        public string Exe { get => exe; }
+        public string[] Args { get => args; }
+        public bool IsEmpty { get => all.Length == 0; }
 
         public static CommandLine Parse(string s) {
             var parser = new CommandLineParser();
@@ -54,7 +40,7 @@ namespace CommandLineParser {
         }
 
         public override string ToString() {
-            return ToString(Exe, Args);
+            return CommandLineEncoder.Encode(all);
         }
 
         public static string ToString(string s) {

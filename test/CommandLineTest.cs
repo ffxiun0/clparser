@@ -290,6 +290,9 @@ namespace CLParserTest {
         public void TestEncodeArgumentInjection() {
             // [test.exe] [--name] [John Smith" --delete "*] ->
             // [test.exe --name "John Smith\" --delete \"*"]
+            // ex. unsecure
+            //   [test.exe --name "John Smith" --delete "*"] ->
+            //   [test.exe] [--name] [John Smith] [--delete] [*]
             var exe = "test.exe";
             var args = new string[] {
                 "--name",
@@ -308,15 +311,21 @@ namespace CLParserTest {
 
         [TestMethod]
         public void TestEncodeArgumentInjection2() {
-            // [test.exe] [--name] [John Smith\" --delete *] ->
-            // [test.exe --name "John Smith\\\" --delete *"]
+            // [test.exe] [--name] [John Smith\" --delete * -m \"] ->
+            // [test.exe --name "John Smith\\\" --delete * -m \\\"]
+            // ex. unsecure (" -> \")
+            //   [test.exe --name "John Smith\\" --delete * -m \\""] ->
+            //   [test.exe] [--name] [John Smith\] [--delete] [*] [-m] [\]
+            // ex. unsecure (" -> "")
+            //   [test.exe --name "John Smith\"" --delete * -m \"""] ->
+            //   [test.exe] [--name] [John Smith"] [--delete] [*] [-m] ["]
             var exe = "test.exe";
             var args = new string[] {
                 "--name",
-                "John Smith\\\" --delete *",
+                "John Smith\\\" --delete * -m \\\"",
             };
             var cmd = CommandLine.ToString(exe, args);
-            Assert.AreEqual(cmd, "test.exe --name \"John Smith\\\\\\\" --delete *\"");
+            Assert.AreEqual(cmd, "test.exe --name \"John Smith\\\\\\\" --delete * -m \\\\\\\"\"");
 
             var cl = CommandLine.Parse(cmd);
             Assert.IsNotNull(cl);

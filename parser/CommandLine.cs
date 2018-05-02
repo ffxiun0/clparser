@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CommandLineParser {
+namespace CLParser {
     public class CommandLine {
         private string[] all;
         private string exe;

@@ -4,8 +4,8 @@
  */
 using System.Collections.Generic;
 
-namespace CommandLineParser {
-    public class CommandLineParser {
+namespace CLParser {
+    class CommandLineParser {
         private State state;
         private string token;
         private int backslash;

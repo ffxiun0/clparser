@@ -2,13 +2,13 @@
  * Copyright (c) 2018 ffxiun0@gmail.com
  * https://opensource.org/licenses/MIT
  */
-using CommandLineParser;
+using CLParser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace CommandLineTest {
+namespace CLParserTest {
     [TestClass]
     public class CommandLineTest {
         [TestMethod]

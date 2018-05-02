@@ -187,6 +187,42 @@ namespace CLParserTest {
         }
 
         [TestMethod]
+        public void TestParseEscapedQuote() {
+            // [\"] -> ["]
+            var cl = CommandLine.Parse("\\\"");
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, "\"");
+            Assert.AreEqual(cl.Args.Length, 0);
+        }
+
+        [TestMethod]
+        public void TestParseEscapedQuote2() {
+            // [\"\"] -> [""]
+            var cl = CommandLine.Parse("\\\"\\\"");
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, "\"\"");
+            Assert.AreEqual(cl.Args.Length, 0);
+        }
+
+        [TestMethod]
+        public void TestParseEscapedQuoteAndBackslash() {
+            // [\\\"] -> [\"]
+            var cl = CommandLine.Parse("\\\\\\\"");
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, "\\\"");
+            Assert.AreEqual(cl.Args.Length, 0);
+        }
+
+        [TestMethod]
+        public void TestParseEscapedQuoteAndBackslash2() {
+            // [\\-\"] -> [\\-"]
+            var cl = CommandLine.Parse("\\\\-\\\"");
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, "\\\\-\"");
+            Assert.AreEqual(cl.Args.Length, 0);
+        }
+
+        [TestMethod]
         public void TestParseMissingQuote() {
             // ["]
             var cl = CommandLine.Parse("\"");

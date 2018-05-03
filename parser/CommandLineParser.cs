@@ -13,9 +13,8 @@ namespace CLParser {
         private List<string> args;
 
         private enum State {
-            Initial,
-            Token,
             Whitespace,
+            Token,
             Quoted,
             QuotedEnd,
         }
@@ -25,7 +24,7 @@ namespace CLParser {
         }
 
         public IEnumerable<string> Parse(string commandLine) {
-            state = State.Initial;
+            state = State.Whitespace;
             token.Clear();
             backslash = 0;
             args = new List<string>();
@@ -41,14 +40,11 @@ namespace CLParser {
         private void Scan(string commandLine) {
             foreach (var c in commandLine) {
                 switch (state) {
-                    case State.Initial:
-                        ScanInitial(c);
+                    case State.Whitespace:
+                        ScanWhitespace(c);
                         break;
                     case State.Token:
                         ScanToken(c);
-                        break;
-                    case State.Whitespace:
-                        ScanWhitespace(c);
                         break;
                     case State.Quoted:
                         ScanQuoted(c);
@@ -67,7 +63,6 @@ namespace CLParser {
                     AppendBackslash();
                     AddToArgs();
                     break;
-                case State.Initial:
                 case State.Whitespace:
                     break;
                 case State.Quoted:
@@ -77,10 +72,9 @@ namespace CLParser {
             return true;
         }
 
-        private void ScanInitial(char c) {
+        private void ScanWhitespace(char c) {
             switch (c) {
                 case ' ':
-                    state = State.Whitespace;
                     break;
                 case '"':
                     state = State.Quoted;
@@ -115,24 +109,6 @@ namespace CLParser {
                 default:
                     AppendBackslash();
                     AppendChar(c);
-                    break;
-            }
-        }
-
-        private void ScanWhitespace(char c) {
-            switch (c) {
-                case ' ':
-                    break;
-                case '"':
-                    state = State.Quoted;
-                    break;
-                case '\\':
-                    backslash++;
-                    state = State.Token;
-                    break;
-                default:
-                    AppendChar(c);
-                    state = State.Token;
                     break;
             }
         }

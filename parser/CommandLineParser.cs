@@ -3,11 +3,12 @@
  * https://opensource.org/licenses/MIT
  */
 using System.Collections.Generic;
+using System.Text;
 
 namespace CLParser {
     class CommandLineParser {
         private State state;
-        private string token;
+        private StringBuilder token;
         private int backslash;
         private List<string> args;
 
@@ -17,13 +18,15 @@ namespace CLParser {
             Whitespace,
             Quoted,
             QuotedEnd,
-            Backslash,
-            QuotedBackslash,
+        }
+
+        public CommandLineParser() {
+            token = new StringBuilder(128);
         }
 
         public IEnumerable<string> Parse(string commandLine) {
             state = State.Initial;
-            token = "";
+            token.Clear();
             backslash = 0;
             args = new List<string>();
 
@@ -53,12 +56,6 @@ namespace CLParser {
                     case State.QuotedEnd:
                         ScanQuotedEnd(c);
                         break;
-                    case State.Backslash:
-                        ScanBackslash(c);
-                        break;
-                    case State.QuotedBackslash:
-                        ScanQuotedBackslash(c);
-                        break;
                 }
             }
         }
@@ -67,18 +64,14 @@ namespace CLParser {
             switch (state) {
                 case State.Token:
                 case State.QuotedEnd:
-                    args.Add(token);
+                    AppendBackslash();
+                    AddToArgs();
                     break;
                 case State.Initial:
                 case State.Whitespace:
                     break;
                 case State.Quoted:
-                case State.QuotedBackslash:
                     return false;
-                case State.Backslash:
-                    token += new string('\\', backslash);
-                    args.Add(token);
-                    break;
             }
 
             return true;
@@ -94,10 +87,10 @@ namespace CLParser {
                     break;
                 case '\\':
                     backslash++;
-                    state = State.Backslash;
+                    state = State.Token;
                     break;
                 default:
-                    token += c;
+                    AppendChar(c);
                     state = State.Token;
                     break;
             }
@@ -106,19 +99,22 @@ namespace CLParser {
         private void ScanToken(char c) {
             switch (c) {
                 case ' ':
-                    args.Add(token);
-                    token = "";
+                    AppendBackslash();
+                    AddToArgs();
                     state = State.Whitespace;
                     break;
                 case '"':
-                    state = State.Quoted;
+                    if (AppendEscapedBackslash() == 0)
+                        state = State.Quoted;
+                    else
+                        AppendChar(c);
                     break;
                 case '\\':
                     backslash++;
-                    state = State.Backslash;
                     break;
                 default:
-                    token += c;
+                    AppendBackslash();
+                    AppendChar(c);
                     break;
             }
         }
@@ -132,10 +128,10 @@ namespace CLParser {
                     break;
                 case '\\':
                     backslash++;
-                    state = State.Backslash;
+                    state = State.Token;
                     break;
                 default:
-                    token += c;
+                    AppendChar(c);
                     state = State.Token;
                     break;
             }
@@ -144,14 +140,17 @@ namespace CLParser {
         private void ScanQuoted(char c) {
             switch (c) {
                 case '"':
-                    state = State.QuotedEnd;
+                    if (AppendEscapedBackslash() == 0)
+                        state = State.QuotedEnd;
+                    else
+                        AppendChar(c);
                     break;
                 case '\\':
                     backslash++;
-                    state = State.QuotedBackslash;
                     break;
                 default:
-                    token += c;
+                    AppendBackslash();
+                    AppendChar(c);
                     break;
             }
         }
@@ -159,78 +158,49 @@ namespace CLParser {
         private void ScanQuotedEnd(char c) {
             switch (c) {
                 case ' ':
-                    args.Add(token);
-                    token = "";
+                    AddToArgs();
                     state = State.Whitespace;
                     break;
                 case '"':
-                    token += c;
+                    AppendChar(c);
                     state = State.Quoted;
                     break;
                 case '\\':
                     backslash++;
-                    state = State.Backslash;
+                    state = State.Token;
                     break;
                 default:
-                    token += c;
+                    AppendChar(c);
                     state = State.Token;
                     break;
             }
         }
 
-        private void ScanBackslash(char c) {
-            switch (c) {
-                case ' ':
-                    token += new string('\\', backslash);
-                    args.Add(token);
-                    token = "";
-                    backslash = 0;
-                    state = State.Whitespace;
-                    break;
-                case '"':
-                    token += new string('\\', backslash / 2);
-                    if ((backslash % 2) == 0) {
-                        state = State.Quoted;
-                    } else {
-                        token += '"';
-                        state = State.Token;
-                    }
-                    backslash = 0;
-                    break;
-                case '\\':
-                    backslash++;
-                    break;
-                default:
-                    token += new string('\\', backslash);
-                    token += c;
-                    backslash = 0;
-                    state = State.Token;
-                    break;
-            }
+        private void AddToArgs() {
+            args.Add(token.ToString());
+            token.Clear();
         }
 
-        private void ScanQuotedBackslash(char c) {
-            switch (c) {
-                case '"':
-                    token += new string('\\', backslash / 2);
-                    if ((backslash % 2) == 0) {
-                        state = State.QuotedEnd;
-                    } else {
-                        token += '"';
-                        state = State.Quoted;
-                    }
-                    backslash = 0;
-                    break;
-                case '\\':
-                    backslash++;
-                    break;
-                default:
-                    token += new string('\\', backslash);
-                    token += c;
-                    backslash = 0;
-                    state = State.Quoted;
-                    break;
-            }
+        private void AppendChar(char c) {
+            token.Append(c);
+        }
+
+        private void AppendBackslash() {
+            if (backslash == 0) return;
+
+            token.Append('\\', backslash);
+            backslash = 0;
+        }
+
+        private int AppendEscapedBackslash() {
+            if (backslash == 0) return 0;
+
+            token.Append('\\', backslash / 2);
+
+            var remaining = backslash % 2;
+            backslash = 0;
+
+            return remaining;
         }
     }
 }

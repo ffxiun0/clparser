@@ -178,7 +178,7 @@ namespace CLParserTest {
         }
 
         [TestMethod]
-        public void TestParseStateBackslashToWhitespace() {
+        public void TestParseBackslashToWhitespace() {
             // [\\ ] -> [\\]
             var cl = CommandLine.Parse(@"\\ ");
             Assert.IsNotNull(cl);
@@ -291,6 +291,24 @@ namespace CLParserTest {
             var cl = CommandLine.Parse(" abc\tdef\r\nghi\f ");
             Assert.IsNotNull(cl);
             Assert.AreEqual(cl.Exe, "abc\tdef\r\nghi\f");
+            Assert.AreEqual(cl.Args.Length, 0);
+        }
+
+        [TestMethod]
+        public void TestParseMiddleQuote() {
+            // [aaa"bbb ccc"ddd] -> [aaabbb cccddd]
+            var cl = CommandLine.Parse("aaa\"bbb ccc\"ddd");
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, "aaabbb cccddd");
+            Assert.AreEqual(cl.Args.Length, 0);
+        }
+
+        [TestMethod]
+        public void TestParseMiddleQuoteBackslash() {
+            // [\\"bbb ccc"\] -> [\bbb ccc\]
+            var cl = CommandLine.Parse("\\\\\"bbb ccc\"\\");
+            Assert.IsNotNull(cl);
+            Assert.AreEqual(cl.Exe, "\\bbb ccc\\");
             Assert.AreEqual(cl.Args.Length, 0);
         }
 

@@ -13,7 +13,7 @@
 ```csharp
 var cmd = "\"C:\\Program Files\\test.exe\" -m=\"Test message\"";
 var cl = CommandLine.Parse(cmd);
-if (cl != null) {
+if (cl != null) { // missing end of double quotation, if null returned.
     var psi = new ProcessStartInfo(cl.Exe);
     psi.Arguments = CommandLine.ToString(cl.Args);
     Process.Start(psi);

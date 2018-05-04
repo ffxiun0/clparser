@@ -4,13 +4,10 @@
  */
 using CLParser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics;
-using System.Xml;
-using System.Xml.Serialization;
 
 namespace CLParserTest {
     [TestClass]
-    public class CommandLineTest {
+    public class CommandLineParseTest {
         [TestMethod]
         public void TestParseEmpty() {
             // [] ->
@@ -311,139 +308,5 @@ namespace CLParserTest {
             Assert.AreEqual(cl.Exe, "\\bbb ccc\\");
             Assert.AreEqual(cl.Args.Length, 0);
         }
-
-        [TestMethod]
-        public void TestEncodeFullPathArg2() {
-            // [C:\Program Files (x86)\test.exe] [-m] [Test message] ->
-            // ["C:\Program Files (x86)\test.exe" -m "Test message"]
-            var args = new string[] { @"C:\Program Files (x86)\test.exe", "-m", "Test message" };
-            var cmd = CommandLine.ToString(args);
-            Assert.AreEqual(cmd, "\"C:\\Program Files (x86)\\test.exe\" -m \"Test message\"");
-        }
-
-        [TestMethod]
-        public void TestEncodeFullPathSplitArg2() {
-            // [C:\Program Files (x86)\test.exe] [-m] [Test message] ->
-            // ["C:\Program Files (x86)\test.exe" -m "Test message"]
-            var exe = @"C:\Program Files (x86)\test.exe";
-            var args = new string[] { "-m", "Test message" };
-            var cmd = CommandLine.ToString(exe, args);
-            Assert.AreEqual(cmd, "\"C:\\Program Files (x86)\\test.exe\" -m \"Test message\"");
-        }
-
-        [TestMethod]
-        public void TestEncodeDirArg2() {
-            // [test.exe] [-d] [C:\Program Files (x86)\] ->
-            // [test.exe -d "C:\Program Files (x86)\\"]
-            var args = new string[] { "test.exe", "-d", @"C:\Program Files (x86)\" };
-            var cmd = CommandLine.ToString(args);
-            Assert.AreEqual(cmd, @"test.exe -d ""C:\Program Files (x86)\\""");
-        }
-
-        [TestMethod]
-        public void TestEncodeArgumentInjection() {
-            // [test.exe] [--name] [John Smith" --delete "*] ->
-            // [test.exe --name "John Smith\" --delete \"*"]
-            // ex. unsecure
-            //   [test.exe --name "John Smith" --delete "*"] ->
-            //   [test.exe] [--name] [John Smith] [--delete] [*]
-            var exe = "test.exe";
-            var args = new string[] {
-                "--name",
-                "John Smith\" --delete \"*",
-            };
-            var cmd = CommandLine.ToString(exe, args);
-            Assert.AreEqual(cmd, "test.exe --name \"John Smith\\\" --delete \\\"*\"");
-
-            var cl = CommandLine.Parse(cmd);
-            Assert.IsNotNull(cl);
-            Assert.AreEqual(cl.Exe, exe);
-            Assert.AreEqual(cl.Args.Length, 2);
-            Assert.AreEqual(cl.Args[0], args[0]);
-            Assert.AreEqual(cl.Args[1], args[1]);
-        }
-
-        [TestMethod]
-        public void TestEncodeArgumentInjection2() {
-            // [test.exe] [--name] [John Smith\" --delete * -m \"] ->
-            // [test.exe --name "John Smith\\\" --delete * -m \\\""]
-            // ex. unsecure (" -> \")
-            //   [test.exe --name "John Smith\\" --delete * -m \\""] ->
-            //   [test.exe] [--name] [John Smith\] [--delete] [*] [-m] [\]
-            // ex. unsecure (" -> "")
-            //   [test.exe --name "John Smith\"" --delete * -m \"""] ->
-            //   [test.exe] [--name] [John Smith"] [--delete] [*] [-m] ["]
-            var exe = "test.exe";
-            var args = new string[] {
-                "--name",
-                "John Smith\\\" --delete * -m \\\"",
-            };
-            var cmd = CommandLine.ToString(exe, args);
-            Assert.AreEqual(cmd, "test.exe --name \"John Smith\\\\\\\" --delete * -m \\\\\\\"\"");
-
-            var cl = CommandLine.Parse(cmd);
-            Assert.IsNotNull(cl);
-            Assert.AreEqual(cl.Exe, exe);
-            Assert.AreEqual(cl.Args.Length, 2);
-            Assert.AreEqual(cl.Args[0], args[0]);
-            Assert.AreEqual(cl.Args[1], args[1]);
-        }
-
-        [TestMethod]
-        public void TestEncodeFromPatternFile() {
-            var tp = TestPattern.Load(@"..\..\pattern.xml");
-            Assert.IsTrue(tp.PatternList.Length > 0);
-
-            foreach (var p in tp.PatternList) {
-                var encoded = CommandLine.ToString(p.Input);
-
-                var m = string.Format("■Input[{0}] Output[{1}] Encoded[{2}]",
-                    p.Input, p.Output, encoded);
-                Trace.WriteLine(m);
-
-                Assert.AreEqual(encoded, p.Output);
-            }
-        }
-
-        [TestMethod]
-        public void TestParseFromPatternFile() {
-            var tp = TestPattern.Load(@"..\..\pattern.xml");
-            Assert.IsTrue(tp.PatternList.Length > 0);
-
-            foreach (var p in tp.PatternList) {
-                var cl = CommandLine.Parse(p.Output);
-                Assert.IsNotNull(cl);
-
-                Assert.IsFalse(cl.IsEmpty);
-                var decoded = cl.All[0];
-
-                var m = string.Format("■Input[{0}] Output[{1}] Decoded[{2}]",
-                    p.Output, p.Input, decoded);
-                Trace.WriteLine(m);
-
-                Assert.AreEqual(decoded, p.Input);
-            }
-        }
-    }
-
-    public class TestPattern {
-        public Pattern[] PatternList { get; set; }
-
-        public static TestPattern Load(string path) {
-            var doc = new XmlDocument();
-            doc.PreserveWhitespace = true;
-            doc.Load(path);
-
-            var xnr = new XmlNodeReader(doc.DocumentElement);
-            var xs = new XmlSerializer(typeof(TestPattern));
-            var testPattern = (TestPattern)xs.Deserialize(xnr);
-
-            return testPattern;
-        }
-    }
-
-    public class Pattern {
-        public string Input { get; set; }
-        public string Output { get; set; }
     }
 }
